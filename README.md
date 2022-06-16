@@ -1,1 +1,1 @@
-# Smart_Healthcare_Chatbox
+# Smart_Healthcare_Chatbox_for_skin_disease_detection
