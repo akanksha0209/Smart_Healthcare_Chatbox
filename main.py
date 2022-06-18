@@ -169,8 +169,9 @@ def login():
 def chatbot():
     return render_template('chatbot.html')
 
-@app.chatbot('/chatbot', methods=["GET", "POST"])
+@app.route('/chatbot', methods=["GET", "POST"])
 def chatbot():
+    return render_template('chatbot.html')
 
 
 @app.route('/predict', methods=["GET", "POST"])
