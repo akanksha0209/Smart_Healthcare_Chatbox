@@ -11,15 +11,20 @@ import sys
 import os
 import glob
 import re
+from keras.models import Sequential
 import numpy as np
-from PIL import Image as pil_image
+import keras
+import tensorflow
 
-from tensorflow.keras.applications.imagenet_utile import preprocess_input, decode_predictions
-from tensorflow.keras.model import Model, load_model
-from keras.preprocessing import image
+from PIL import Image, ImageOps
+from keras.applications.mobilenet import MobileNet
+from keras.applications.imagenet_utils import preprocess_input, decode_predictions
+from keras.models import Model, load_model
+from keras.preprocessing.image import ImageDataGenerator
 from werkzeug.utils import secure_filename
+from keras.preprocessing import image
 
-from gevent.pywsgi import WGSIServer
+# from gevent.pywsgi import WGSIServer
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///database.db"
@@ -29,8 +34,8 @@ db = SQLAlchemy(app)
 # secret key
 app.secret_key = "akanksha"
 Bootstrap(app)
-
-Model = load_model('model12345.h5')
+#
+Model = load_model('best_model.h5')
 
 lesion_classes_dict = {
     0: 'Melanocytic nevi',
@@ -42,6 +47,43 @@ lesion_classes_dict = {
     6: 'Dermatofibroma'
 
 }
+
+#
+# def model_predict(img_path):
+#     np.set_printoptions(suppress=True)
+#
+#     data = np.ndarray(shape=(1, 224, 224, 3), dtype=np.float32)
+#
+#     # Replace this with the path to your image
+#     image = Image.open(img_path)
+#     # resizing the image to be at least 224x224
+#
+#     size = (224, 224)
+#     image = ImageOps.fit(image, size, Image.ANTIALIAS)
+#
+#     # turn the image into a numpy array
+#     image_array = np.array(image)
+#
+#     # Normalize the image
+#     normalized_image_array = (image_array.astype(np.float32) / 127.0) - 1
+#
+#     # Load the image into the array
+#     data[0] = normalized_image_array
+#
+#     # Load the model
+#     model = tensorflow.keras.models.load_model('model.h5')
+#
+#     # run the inference
+#     preds = ""
+#     prediction = model.predict(data)
+#     if np.argmax(prediction) == 0:
+#         preds = f"Unripe😑"
+#     elif np.argmax(prediction) == 1:
+#         preds = f"Overripe😫"
+#     else:
+#         preds = f"ripe😄"
+#
+#     return preds
 
 
 def model_predict(image_path, Model):
@@ -121,6 +163,14 @@ def login():
             return render_template('login.html', form=login_form)
 
     return render_template('login.html', form=login_form)
+
+
+@app.route('/chatbot')
+def chatbot():
+    return render_template('chatbot.html')
+
+@app.chatbot('/chatbot', methods=["GET", "POST"])
+def chatbot():
 
 
 @app.route('/predict', methods=["GET", "POST"])
