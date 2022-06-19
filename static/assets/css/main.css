@@ -140,10 +140,10 @@ table {
 body {
   -webkit-text-size-adjust: none;
 }
-#bot {
-  align-items: center;
-  justify-content: center;
-  justify-items: center;
+.img {
+  display: flex;
+  float: right;
+  align-items: right;
   position: relative;
 }
 
