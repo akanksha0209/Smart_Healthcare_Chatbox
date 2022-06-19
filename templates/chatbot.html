@@ -14,10 +14,20 @@
 			<div id="wrapper">
 
 				<!-- Header -->
-					<header id="header" class="alt">
-<!--						<span class="logo"><img src="static/images/logo.svg" alt="" /></span>-->
-						<h1>Know Your Skin</h1>
-						</header>
+				<header id="header" class="alt">
+					<h1>Know Your Health</h1>
+					</header>
+			<nav id="nav">
+					<ul>
+						<ul>
+						<li><a href="{{ url_for('chatbot') }}" class="active">Chat With Us</a></li>
+						<li><a href="{{ url_for('upload_form') }}" class="active">Upload Image</a></li>
+							<li><a href="{{ url_for('general_diseases') }}">More Info 'Bout General Diseases</a></li>
+						<li><a href="{{ url_for('main') }}">Logout</a></li>
+
+					</ul>
+					</ul>
+				</nav>
                 <div id="main">
 
 						<!-- Introduction -->
