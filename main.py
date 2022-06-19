@@ -163,14 +163,14 @@ def upload_form():
                 ime.save(ime_location)
                 ime_location_image = os.path.join(app.config["UPLOAD_DISPLAY_FOLDER"], filename)
                 ime.save(ime_location_image)
-                full_filename = os.path.join(app.config['UPLOAD_DISPLAY_FOLDER'], filename)
-                # path = f"C:\Users\akank\PycharmProjects\Smart Healthcare Chatbox\static\display_uploads\{filename}"
-                # # preds = model_predict(ime_location, Model)
-                # pred_class = preds.argmax(axis=-1)
-                # pr = lesion_classes_dict[pred_class[0]]
-                # predicted_result = str(pr)
-                # flash(predicted_result)
-
+                # full_filename = os.path.join(app.config['UPLOAD_DISPLAY_FOLDER'], filename)
+                path = f"C:/Users/akank/PycharmProjects/Smart Healthcare Chatbox/static/display_uploads/{filename}"
+                preds = model_predict(ime_location, Model)
+                pred_class = preds.argmax(axis=-1)
+                pr = lesion_classes_dict[pred_class[0]]
+                predicted_result = str(pr)
+                print(predicted_result)
+                flash(predicted_result)
 
                 return render_template('upload.html', filename=filename, prediction=0)
             # return redirect(request.url)
@@ -183,7 +183,9 @@ def display_image(filename):
     # print('display_image filename: ' + filename)
     return redirect(url_for('static', filename='display_uploads/' + filename), code=301)
 
-
+@app.route('/general_diseases')
+def general_diseases():
+    return render_template('disease.html')
 # @app.route('/predict', methods=["GET", "POST"])
 # def upload():
 #     if request.method == "POST":
