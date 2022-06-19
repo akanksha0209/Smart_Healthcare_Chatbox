@@ -1,0 +1,98 @@
+<!DOCTYPE HTML>
+
+<html>
+	<head>
+		<title>Know Your Skin</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="static/assets/css/main.css" />
+		<noscript><link rel="stylesheet" href="static/assets/css/noscript.css" /></noscript>
+	</head>
+	<body class="is-preload">
+
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Header -->
+					<header id="header" class="alt">
+						<h1>Know Your Health</h1>
+						</header>
+				<nav id="nav">
+						<ul>
+							<li><a href="{{ url_for('chatbot') }}" class="active">Chat With Us</a></li>
+
+							<li><a href="{{ url_for('main') }}">Logout</a></li>
+						</ul>
+					</nav>
+                <div id="main">
+
+						<!-- Introduction -->
+							<section id="intro" class="main">
+								<div class="spotlight">
+									<div class="content">
+										<header class="major">
+											<h2>Skin Disease Predictor</h2>
+
+										</header>
+
+
+<h2>Select a file to upload</h2>
+<p>
+	{% with messages = get_flashed_messages() %}
+	  {% if messages %}
+		<ul>
+		{% for message in messages %}
+		  <li>{{ message }}</li>
+		{% endfor %}
+		</ul>
+	  {% endif %}
+	{% endwith %}
+</p>
+<!--{% if filename %}-->
+<!--	<div>-->
+<!--		<img src="C:\Users\akank\Downloads\ISIC_0024310.jpg" width = "200" height = "200">-->
+<!--	</div>-->
+<!--	</div>-->
+
+<!--{% endif %}-->
+										<form method="POST" action="/upload" enctype="multipart/form-data">
+    <div class="form-group">
+		<label>
+			Select Image
+		</label>
+		<div class="custom_file">
+			<input type="file" class="custom-file-input" name="image" id="image">
+			<label class="custom-file-label" for="image">Select Image...</label>
+		</div>
+	</div>
+	<button type="submit" class="btn btn-primary">
+		Submit and upload image
+	</button>
+<!--<form method="post" action="/" enctype="multipart/form-data">-->
+<!--    <dl>-->
+<!--		<p>-->
+<!--			<input type="file" name="file" autocomplete="off" required>-->
+<!--		</p>-->
+<!--    </dl>-->
+<!--    <p>-->
+<!--		<input type="submit" value="Submit">-->
+<!--	</p>-->
+</form>
+									</div>
+								</div>
+							</section>
+				</div>
+
+		<!-- Scripts -->
+					<div>
+			<script src="static/assets/js/jquery.min.js"></script>
+			<script src="static/assets/js/jquery.scrollex.min.js"></script>
+			<script src="static/assets/js/jquery.scrolly.min.js"></script>
+			<script src="static/assets/js/browser.min.js"></script>
+			<script src="static/assets/js/breakpoints.min.js"></script>
+			<script src="static/assets/js/util.js"></script>
+			<script src="static/assets/js/main.js"></script>
+			</div>
+				</div>
+	</body>
+</html>

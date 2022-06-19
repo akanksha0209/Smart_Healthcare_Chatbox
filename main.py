@@ -1,6 +1,7 @@
 from __future__ import division, print_function
 
-from flask import Flask, render_template, redirect, request, url_for
+import cv2
+from flask import Flask, render_template, redirect, request, url_for, flash
 from flask_bootstrap import Bootstrap
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import FlaskForm
@@ -20,6 +21,7 @@ from PIL import Image, ImageOps
 from keras.applications.mobilenet import MobileNet
 from keras.applications.imagenet_utils import preprocess_input, decode_predictions
 from keras.models import Model, load_model
+
 from keras.preprocessing.image import ImageDataGenerator
 from werkzeug.utils import secure_filename
 from keras.preprocessing import image
@@ -30,13 +32,16 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///database.db"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
-
+UPLOAD_FOLDER = 'C:/Users/akank/PycharmProjects/Smart Healthcare Chatbox/static/uploads'
+UPLOAD_DISPLAY_FOLDER = 'C:/Users/akank/PycharmProjects/Smart Healthcare Chatbox/static/display_uploads'
 # secret key
 app.secret_key = "akanksha"
 Bootstrap(app)
 #
 Model = load_model('best_model.h5')
-
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['UPLOAD_DISPLAY_FOLDER'] = UPLOAD_DISPLAY_FOLDER
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 lesion_classes_dict = {
     0: 'Melanocytic nevi',
     1: 'Melanoma-Cancerous',
@@ -47,48 +52,16 @@ lesion_classes_dict = {
     6: 'Dermatofibroma'
 
 }
+ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
 
-#
-# def model_predict(img_path):
-#     np.set_printoptions(suppress=True)
-#
-#     data = np.ndarray(shape=(1, 224, 224, 3), dtype=np.float32)
-#
-#     # Replace this with the path to your image
-#     image = Image.open(img_path)
-#     # resizing the image to be at least 224x224
-#
-#     size = (224, 224)
-#     image = ImageOps.fit(image, size, Image.ANTIALIAS)
-#
-#     # turn the image into a numpy array
-#     image_array = np.array(image)
-#
-#     # Normalize the image
-#     normalized_image_array = (image_array.astype(np.float32) / 127.0) - 1
-#
-#     # Load the image into the array
-#     data[0] = normalized_image_array
-#
-#     # Load the model
-#     model = tensorflow.keras.models.load_model('model.h5')
-#
-#     # run the inference
-#     preds = ""
-#     prediction = model.predict(data)
-#     if np.argmax(prediction) == 0:
-#         preds = f"Unripe😑"
-#     elif np.argmax(prediction) == 1:
-#         preds = f"Overripe😫"
-#     else:
-#         preds = f"ripe😄"
-#
-#     return preds
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
 def model_predict(image_path, Model):
-    img = image.load_img(image_path, target_size=(224, 224, 3))
-    x = image.img_to_array(img)
+    img = tensorflow.keras.preprocessing.image.load_img(image_path, target_size=(224, 224, 3))
+    x = tensorflow.keras.preprocessing.image.img_to_array(img)
     x = np.expand_dims(x, axis=0)
     preds = Model.predict(x)
     return preds
@@ -169,26 +142,154 @@ def login():
 def chatbot():
     return render_template('chatbot.html')
 
-@app.route('/chatbot', methods=["GET", "POST"])
-def chatbot():
-    return render_template('chatbot.html')
 
-
-@app.route('/predict', methods=["GET", "POST"])
-def upload():
+@app.route('/upload', methods=["GET", "POST"])
+def upload_form():
     if request.method == "POST":
-        f = request.files['file']
-        basepath = os.path.dirname(__file__)
-        file_path = os.path.join(basepath, 'uploads', secure_filename(f.filename))
-        f.save(file_path)
-        preds = model_predict(file_path, Model)
-        pred_class = preds.argmax(axis=-1)
-        pr = lesion_classes_dict[pred_class[0]]
-        result = str(pr)
-        return result
-    return None
+        if request.files:
+            ime = request.files["image"]
+            if ime.filename == "":
+                print("Image must have a filename")
+                return redirect(request.url)
+            if not allowed_file(ime.filename):
+                print("Image extension is not allowed")
+                return redirect(request.url)
+            else:
+                filename = secure_filename(ime.filename)
+                ime.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
+                print("Image saved")
+                flash('Image successfully uploaded')
+                ime_location = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+                ime.save(ime_location)
+                ime_location_image = os.path.join(app.config["UPLOAD_DISPLAY_FOLDER"], filename)
+                ime.save(ime_location_image)
+                full_filename = os.path.join(app.config['UPLOAD_DISPLAY_FOLDER'], filename)
+                # path = f"C:\Users\akank\PycharmProjects\Smart Healthcare Chatbox\static\display_uploads\{filename}"
+                # # preds = model_predict(ime_location, Model)
+                # pred_class = preds.argmax(axis=-1)
+                # pr = lesion_classes_dict[pred_class[0]]
+                # predicted_result = str(pr)
+                # flash(predicted_result)
+
+
+                return render_template('upload.html', filename=filename, prediction=0)
+            # return redirect(request.url)
+
+    return render_template('upload.html')
+
+
+@app.route('/display/<filename>')
+def display_image(filename):
+    # print('display_image filename: ' + filename)
+    return redirect(url_for('static', filename='display_uploads/' + filename), code=301)
+
+
+# @app.route('/predict', methods=["GET", "POST"])
+# def upload():
+#     if request.method == "POST":
+#         f = request.files['file']
+#         basepath = os.path.dirname(__file__)
+#         file_path = os.path.join(basepath, 'uploads', secure_filename(f.filename))
+#         f.save(file_path)
+#         preds = model_predict(file_path, Model)
+#         pred_class = preds.argmax(axis=-1)
+#         pr = lesion_classes_dict[pred_class[0]]
+#         result = str(pr)
+#         return result
+#     return None
+
+
+# @app.route('/upload')
+# def predict():
+#     return render_template('upload.html')
+#
+#
+# @app.route('/upload', methods=["POST"])
+# def upload_image():
+#     if 'file' not in request.files:
+#         flash('No file part')
+#         return redirect(request.url)
+#     file = request.files['file']
+#     if file.filename == '':
+#         flash('No image selected for uploading')
+#         return redirect(request.url)
+#     if file and allowed_file(file.filename):
+#         filename = secure_filename(file.filename)
+#         file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+#         # path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+#         #print(filename)
+#         # print('upload_image filename: ' + filename)
+#         flash('Image successfully uploaded and displayed below')
+#         return render_template('upload.html', filename=filename)
+#     else:
+#         flash('Allowed image types are -> png, jpg, jpeg, gif')
+#         return redirect(request.url)
+#
+#
+# def disease_predict(file_path):
+#     preds = model_predict(file_path, Model)
+#     pred_class = preds.argmax(axis=-1)
+#     pr = lesion_classes_dict[pred_class[0]]
+#     result = str(pr)
+#     return result
+
+
+# @app.route('/predict', methods=["GET", "POST"])
+# def upload():
+#     if 'file' not in request.files:
+#         flash('No file part')
+#         return redirect(request.url)
+#     file = request.files['file']
+#     if file.filename == '':
+#         flash('No image selected for uploading')
+#         return redirect(request.url)
+#     if file and allowed_file(file.filename):
+#         filename = secure_filename(file.filename)
+#         file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+#         file.save(file_path)
+#         # print('upload_image filename: ' + filename)
+#         flash('Image successfully uploaded and displayed below')
+#         preds = model_predict(file_path, Model)
+#         pred_class = preds.argmax(axis=-1)
+#         pr = lesion_classes_dict[pred_class[0]]
+#         result = str(pr)
+#         return render_template('upload.html', filename=filename, result=result)
+#     else:
+#         flash('Allowed image types are -> png, jpg, jpeg, gif')
+#         return redirect(request.url)
+
+# result = ''
+# file_path=''
+# filename=''
+# if request.method == "POST":
+#     if 'file' not in request.files:
+#         flash('No file part')
+#         return redirect(request.url)
+#     file = request.files['file']
+#     if file.filename == '':
+#         flash('No image selected for uploading')
+#         return redirect(request.url)
+#     if file and allowed_file(file.filename):
+#         filename = secure_filename(file.filename)
+#         file_path=os.path.join(app.config['UPLOAD_FOLDER'], filename)
+#         file.save(file_path)
+#         # print('upload_image filename: ' + filename)
+#         flash('Image successfully uploaded and displayed below')
+#     preds = model_predict(file_path, Model)
+#     pred_class = preds.argmax(axis=-1)
+#     pr = lesion_classes_dict[pred_class[0]]
+#     result = str(pr)
+#
+# return render_template('home.html', result=result, filename=filename)
+
+#
+# @app.route('/display/<filename>')
+# def display_image(filename):
+#     # print('display_image filename: ' + filename)
+#     return redirect(url_for('static', filename='uploads/' + filename), code=301)
 
 
 if __name__ == '__main__':
     # db.create_all()
     app.run(debug=True)
+# app.run(port=5000)
