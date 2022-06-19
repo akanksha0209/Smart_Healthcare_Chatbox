@@ -20,7 +20,7 @@
 				<nav id="nav">
 						<ul>
 							<li><a href="{{ url_for('chatbot') }}" class="active">Chat With Us</a></li>
-
+                            <li><a href="{{ url_for('general_diseases') }}">More Info 'Bout General Diseases</a></li>
 							<li><a href="{{ url_for('main') }}">Logout</a></li>
 						</ul>
 					</nav>
@@ -34,50 +34,10 @@
 											<h2>Skin Disease Predictor</h2>
 
 										</header>
+										 <iframe src="http://skin.test.woza.work/" title="skin detection" width="1000" height="700px"></iframe>
 
 
-<h2>Select a file to upload</h2>
-<p>
-	{% with messages = get_flashed_messages() %}
-	  {% if messages %}
-		<ul>
-		{% for message in messages %}
-		  <li>{{ message }}</li>
-		{% endfor %}
-		</ul>
-	  {% endif %}
-	{% endwith %}
-</p>
-<!--{% if filename %}-->
-<!--	<div>-->
-<!--		<img src="C:\Users\akank\Downloads\ISIC_0024310.jpg" width = "200" height = "200">-->
-<!--	</div>-->
-<!--	</div>-->
 
-<!--{% endif %}-->
-										<form method="POST" action="/upload" enctype="multipart/form-data">
-    <div class="form-group">
-		<label>
-			Select Image
-		</label>
-		<div class="custom_file">
-			<input type="file" class="custom-file-input" name="image" id="image">
-			<label class="custom-file-label" for="image">Select Image...</label>
-		</div>
-	</div>
-	<button type="submit" class="btn btn-primary">
-		Submit and upload image
-	</button>
-<!--<form method="post" action="/" enctype="multipart/form-data">-->
-<!--    <dl>-->
-<!--		<p>-->
-<!--			<input type="file" name="file" autocomplete="off" required>-->
-<!--		</p>-->
-<!--    </dl>-->
-<!--    <p>-->
-<!--		<input type="submit" value="Submit">-->
-<!--	</p>-->
-</form>
 									</div>
 								</div>
 							</section>
